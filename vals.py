@@ -1,0 +1,12 @@
+size = (456,100,3)
+ratio = 4.56
+BIEL_MIN = 180
+SHOW_IMG = False
+SIZE_BLOB = 700
+SIZEMAX_BLOB = 8000
+SEAR_ONCE = False
+SHOW_ONCE = False
+DEL = True
+VIDEO = False
+TIME = False
+FRAM = 100
