@@ -30,28 +30,28 @@ def remBlob(IMG):
 	return IMG
 
 def OCR(IMAGE,nazwa,nr,rgb,bmp):
-	if rgb == False:
+	if rgb==False:
 		IMAGE = cv2.copyMakeBorder(IMAGE,2,2,2,2,cv2.BORDER_CONSTANT,value=[255,255,255])
 		IMAGE = cv2.dilate(IMAGE,np.ones((3,3),np.uint8),iterations = 1)	
 		#ret,IMAGE = cv2.threshold(IMAGE,0,255,cv2.THRESH_OTSU)
 		IMAGE = cv2.erode(IMAGE,np.ones((5,5),np.uint8),iterations = 1)
-	if bmp == True:
-		cv2.imwrite(nazwa+nr+".bmp",IMAGE)	
-	else:
-		cv2.imwrite(nazwa+nr+".jpg",IMAGE)	
+	#if bmp:
+	#	cv2.imwrite(nazwa+nr+".bmp",IMAGE)	
+	#else:
+	#	cv2.imwrite(nazwa+nr+".jpg",IMAGE)	
+	t7 = pytesseract.image_to_string(IMAGE,config="--psm 7 ")
 	if vals.SHOW_IMG==True:
 		cv2.imshow(nazwa+nr,IMAGE)
-	if bmp == True:
-		t7 = pytesseract.image_to_string(Image.open(nazwa+nr+".bmp"),config="--psm 7 ")
-	else:
-		t7 = pytesseract.image_to_string(Image.open(nazwa+nr+".jpg"),config="--psm 7 ")
-		if vals.DEL == True:
-			os.remove(nazwa+nr+".jpg")
+	#if bmp:
+	#	t7 = pytesseract.image_to_string(Image.open(nazwa+nr+".bmp"),config="--psm 7 ")
+	#else:
+	#	t7 = pytesseract.image_to_string(Image.open(nazwa+nr+".jpg"),config="--psm 7 ")
+	#	if vals.DEL == True:
+	#		os.remove(nazwa+nr+".jpg")
 	t7 = re.sub(r'\W+', '', t7)
 	t7 = t7.replace("_", "")
 	t7 = t7.upper()
 	if (len(t7)>6 and len(t7)<9 and vals.SHOW_ONCE==False):
-		#cv2.imshow(nazwa+nr,IMAGE)
 		vals.SHOW_ONCE=True
 	return t7
 
@@ -117,15 +117,15 @@ def rec_white(mask2,name,nr):
 		mask2 = cv2.erode(mask2,np.ones((5,5),np.uint8),iterations = 1)
 		if vals.SHOW_IMG==True:
 			cv2.imshow(name+nr,mask2)
-		cv2.imwrite(name+nr+".jpg", mask2)
-		textfw = pytesseract.image_to_string(Image.open(name+nr+".jpg"),config="--psm 7")
+		textfw = pytesseract.image_to_string(mask2,config="--psm 7 ")
+		#cv2.imwrite(name+nr+".jpg", mask2)
+		#textfw = pytesseract.image_to_string(Image.open(name+nr+".jpg"),config="--psm 7")
 		textfw = re.sub(r'\W+', '', textfw)
 		textfw = textfw.replace("_", "")
 		textfw = textfw.upper()
-		if vals.DEL == True:
-			os.remove(name+nr+".jpg")
+		#if vals.DEL == True:
+		#	os.remove(name+nr+".jpg")
 		if (len(textfw)>6 and len(textfw)<9 and vals.SHOW_ONCE==False):
-			#cv2.imshow(name+nr,mask2)
 			vals.SHOW_ONCE=True
 	except:
 		pass
@@ -135,17 +135,16 @@ def rec_white(mask2,name,nr):
 def sear(img,nr):
 	text0,text1,text2,text3,text4 = "","","","",""
 	text0 = OCR(img,"e",nr,True,False)
-	#cv2.imshow("text0"+nr,img)
 	imgg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 	imgg = imgg.astype("uint8")
 	text3 = OCR(img,"e",nr,True,False)
 
 
 	ret,imgg = cv2.threshold(imgg,127,255,cv2.THRESH_OTSU)
-	cv2.imshow("text1"+nr,imgg)
+	#cv2.imshow("text1"+nr,imgg)
 	text1 = OCR(imgg,"ee",nr,False,False)
 	imgg = cv2.morphologyEx(imgg, cv2.MORPH_OPEN, np.ones((3,3),np.uint8))
-	cv2.imshow("erode"+nr,imgg)
+	#cv2.imshow("erode"+nr,imgg)
 
 	
 	#ret,imge = cv2.threshold(imgg,0,255,cv2.THRESH_OTSU)
@@ -163,10 +162,10 @@ def sear(img,nr):
 def clnhist(nam,nr):
 	text = ""
 	o = ImageTranform.Obrazek(nam+nr+'.bmp',nam+nr)
-	#pth = o.tnij()
-	#order = sorted(glob.glob(pth+'/*.bmp'))
-	#for i in order:
-	#	text+=str(hists.HistogramOCR(i))
+	pth = o.tnij()
+	order = sorted(glob.glob(pth+'/*.bmp'))
+	for i in order:
+		text+=str(hists.HistogramOCR(i))
 	shutil.rmtree(pth)
 	if vals.DEL == True:
 		os.remove(nam+nr+'.bmp')
@@ -207,7 +206,7 @@ def procedure(img,nr):
 	textin,text0,text1,text2,text3,text4,text5,text6,text7,text8,text9 = "","","","","","","","","","",""
 	cascade = cv2.CascadeClassifier('files/haarcascade_russian_plate_number.xml')
 	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-	#plate = cascade.detectMultiScale(gray, 1.3, 5)
+	plate = cascade.detectMultiScale(gray, 1.3, 5)
 	#szukanie kaskada haara najmniejszego wycinka zawietajacego tablice rejestracyjna
 	#pool = ThreadPool(processes=1)
 	#haar_result = pool.apply_async(haar, (plate, gray,nr))
@@ -223,15 +222,15 @@ def procedure(img,nr):
 	text2 = OCR(pha2res,"qqq",nr,False,True)
 	if (len(text2)==7 or len(text2)==8):
 		text9 = clnhist("qqq",nr)
-	else:
-		os.remove("qqq"+nr+".bmp")
+	#else:
+	#	os.remove("qqq"+nr+".bmp")
 	#text3 = oper_white(img,"w",nr,0.01)
 	#text5 = oper_white(img,"ww",nr,0.1)
 	#
 	#img = find_white(img,"wwww",nr,0.01)
 	#img = remBlob(img)
 	#text6 = rec_white(img,"wwww",nr)
-	#text0,text4,text1,text7,text8 = haar(plate, gray,nr)
+	text0,text4,text1,text7,text8 = haar(plate, gray,nr)
 
 	#text0,text4,text1,text7,text8 = haar_result.get()
 	return (text0,text1,text2,text3,text4,text5,text6,text7,text8,text9)
